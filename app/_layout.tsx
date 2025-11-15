@@ -6,6 +6,8 @@ import { ActivityIndicator, View } from "react-native";
 import { AuthProvider, useAuth } from "../context/auth";
 import { CartProvider } from "../context/CartContext";
 import { FavoritesProvider } from "../context/FavoritesContext";
+import { OrderProvider } from "../context/OrderContext";
+import { ProfileProvider } from "../context/ProfileContext";
 import { COLORS } from "../styles/colors";
 
 function RootLayoutNav() {
@@ -49,6 +51,7 @@ function RootLayoutNav() {
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="category/[id]" />
             <Stack.Screen name="product/[id]" />
+            <Stack.Screen name="edit-profile" />
         </Stack>
     );
 }
@@ -56,11 +59,15 @@ function RootLayoutNav() {
 export default function RootLayout() {
     return (
         <AuthProvider>
-            <CartProvider>
-                <FavoritesProvider>
-                    <RootLayoutNav />
-                </FavoritesProvider>
-            </CartProvider>
+            <ProfileProvider>
+                <CartProvider>
+                    <FavoritesProvider>
+                        <OrderProvider>
+                            <RootLayoutNav />
+                        </OrderProvider>
+                    </FavoritesProvider>
+                </CartProvider>
+            </ProfileProvider>
         </AuthProvider>
     );
 }

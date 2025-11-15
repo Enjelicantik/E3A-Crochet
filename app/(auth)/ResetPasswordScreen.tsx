@@ -10,7 +10,7 @@ import { COLORS } from "../../styles/colors";
 import Button from "../../components/common/Button";
 import InputField from "../../components/common/InputField";
 
-const LOGO_IMAGE = require("../../assets/images/logo.png"); // Pastikan path logo benar
+const LOGO_IMAGE = require("../../assets/images/Logo Crochet.png"); // Pastikan path logo benar
 
 const ResetPasswordScreen = () => {
     const [newPassword, setNewPassword] = useState("");

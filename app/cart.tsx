@@ -1,5 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useNavigation } from "expo-router";
+import { useRouter } from "expo-router";
 import React from "react";
 import {
     ScrollView,
@@ -17,7 +17,7 @@ import { useCart } from "../context/CartContext";
 import { COLORS } from "../styles/colors";
 
 export default function CartScreen() {
-    const navigation = useNavigation();
+    const router = useRouter();
     const insets = useSafeAreaInsets();
     const {
         cartItems,
@@ -43,7 +43,7 @@ export default function CartScreen() {
             {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity
-                    onPress={() => navigation.goBack()}
+                    onPress={() => router.back()}
                     style={styles.backButton}
                 >
                     <MaterialCommunityIcons
@@ -107,7 +107,10 @@ export default function CartScreen() {
                             Rp {totalAmount.toLocaleString("id-ID")}
                         </Text>
                     </View>
-                    <TouchableOpacity style={styles.checkoutButton}>
+                    <TouchableOpacity
+                        style={styles.checkoutButton}
+                        onPress={() => router.push("/checkout")}
+                    >
                         <Text style={styles.checkoutText}>
                             Proceed to Checkout
                         </Text>

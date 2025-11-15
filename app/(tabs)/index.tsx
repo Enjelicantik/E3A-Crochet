@@ -18,6 +18,7 @@ import {
 } from "react-native-safe-area-context";
 import ProductGridCard from "../../components/ProductGridCard";
 import { useCart } from "../../context/CartContext";
+import { useProfile } from "../../context/ProfileContext";
 import { fetchProducts, formatPrice, Product } from "../../lib/api";
 import { COLORS } from "../../styles/colors";
 
@@ -27,18 +28,75 @@ export default function HomeScreen() {
     const insets = useSafeAreaInsets();
     const [headerHeight, setHeaderHeight] = useState(0);
     const { getCartItemCount } = useCart();
+    const { profile } = useProfile();
     const cartItemCount = getCartItemCount();
     const [products, setProducts] = useState<Product[]>([]);
+    const [allProducts, setAllProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState("");
+
+    // Get greeting based on time of day
+    const getGreeting = () => {
+        const hour = new Date().getHours();
+        if (hour < 12) return "Good Morning";
+        if (hour < 17) return "Good Afternoon";
+        return "Good Evening";
+    };
 
     useEffect(() => {
         loadProducts();
     }, []);
 
+    useEffect(() => {
+        if (!searchQuery.trim()) {
+            setProducts(allProducts);
+            return;
+        }
+
+        const query = searchQuery.toLowerCase().trim();
+        const matchedProducts: Product[] = [];
+        const otherProducts: Product[] = [];
+
+        allProducts.forEach((product) => {
+            const productName = product.name.toLowerCase();
+            if (productName.includes(query)) {
+                // Check if it's an exact match or starts with query
+                if (productName === query) {
+                    matchedProducts.unshift(product); // Exact match at the very top
+                } else if (productName.startsWith(query)) {
+                    matchedProducts.push(product); // Starts with query
+                } else {
+                    matchedProducts.push(product); // Contains query
+                }
+            } else {
+                otherProducts.push(product);
+            }
+        });
+
+        // Sort matched products: exact match first, then starts with, then contains
+        matchedProducts.sort((a, b) => {
+            const aName = a.name.toLowerCase();
+            const bName = b.name.toLowerCase();
+
+            // Exact match priority
+            if (aName === query && bName !== query) return -1;
+            if (bName === query && aName !== query) return 1;
+
+            // Starts with priority
+            if (aName.startsWith(query) && !bName.startsWith(query)) return -1;
+            if (bName.startsWith(query) && !aName.startsWith(query)) return 1;
+
+            return 0;
+        });
+
+        setProducts([...matchedProducts, ...otherProducts]);
+    }, [searchQuery, allProducts]);
+
     const loadProducts = async () => {
         try {
             setLoading(true);
             const data = await fetchProducts();
+            setAllProducts(data);
             setProducts(data);
         } catch (error) {
             console.error("Failed to load products:", error);
@@ -95,6 +153,8 @@ export default function HomeScreen() {
                         placeholder="What kind of crochet do you like?"
                         placeholderTextColor="#999"
                         style={styles.searchInput}
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
                     />
                 </View>
             </Animated.View>
@@ -114,15 +174,17 @@ export default function HomeScreen() {
                         <View style={styles.userInfo}>
                             <Image
                                 source={{
-                                    uri: "https://via.placeholder.com/50/4CAF50/000000?Text=U",
+                                    uri: profile.profileImage,
                                 }}
                                 style={styles.avatar}
                             />
                             <View>
                                 <Text style={styles.greeting}>
-                                    Good Morning 🌸
+                                    {getGreeting()} 🌸
                                 </Text>
-                                <Text style={styles.userName}>Enjeli!</Text>
+                                <Text style={styles.userName}>
+                                    {profile.username}!
+                                </Text>
                             </View>
                         </View>
                         <TouchableOpacity

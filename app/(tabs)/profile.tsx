@@ -13,10 +13,12 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import ProfileMenuItem from "../../components/ProfileMenuItem";
 import { useAuth } from "../../context/auth";
+import { useProfile } from "../../context/ProfileContext";
 import { COLORS } from "../../styles/colors";
 
 export default function ProfileScreen() {
     const { signOut } = useAuth();
+    const { profile } = useProfile();
     const router = useRouter();
 
     const handleMenuPress = (menu: string) => {
@@ -51,17 +53,18 @@ export default function ProfileScreen() {
                 <View style={styles.profileContent}>
                     <Image
                         source={{
-                            uri: "https://via.placeholder.com/80/4A5568/ffffff?Text=E",
+                            uri: profile.profileImage,
                         }}
                         style={styles.profileImage}
                     />
                     <View style={styles.profileInfo}>
-                        <Text style={styles.profileName}>ENJELI</Text>
-                        <Text style={styles.profileEmail}>
-                            enjeli062003@gmail.com
-                        </Text>
+                        <Text style={styles.profileName}>{profile.username}</Text>
+                        <Text style={styles.profileEmail}>{profile.email}</Text>
                     </View>
-                    <TouchableOpacity style={styles.editButton}>
+                    <TouchableOpacity
+                        style={styles.editButton}
+                        onPress={() => router.push("/edit-profile")}
+                    >
                         <MaterialCommunityIcons
                             name="pencil"
                             size={20}
@@ -81,25 +84,25 @@ export default function ProfileScreen() {
                         icon="account-outline"
                         title="Account"
                         subtitle="Privacy, security, change email or number"
-                        onPress={() => handleMenuPress("Account")}
+                        onPress={() => router.push("/account")}
                     />
                     <ProfileMenuItem
                         icon="lock-outline"
                         title="Change Password"
                         subtitle="Change your password to secure your account"
-                        onPress={() => handleMenuPress("Change Password")}
+                        onPress={() => router.push("/change-password")}
                     />
                     <ProfileMenuItem
                         icon="history"
                         title="Order History"
                         subtitle="View your past orders"
-                        onPress={() => handleMenuPress("Order History")}
+                        onPress={() => router.push("/order-history")}
                     />
                     <ProfileMenuItem
                         icon="help-circle-outline"
                         title="Help"
                         subtitle="Help center, contact us, privacy policy"
-                        onPress={() => handleMenuPress("Help")}
+                        onPress={() => router.push("/help")}
                     />
                     <ProfileMenuItem
                         icon="logout"
