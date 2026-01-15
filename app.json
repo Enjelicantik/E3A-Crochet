@@ -4,7 +4,7 @@
     "slug": "Project-PPM",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/Logo Crochet.png",
     "scheme": "projectppm",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -12,6 +12,8 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.enjeli.e3acrochet",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

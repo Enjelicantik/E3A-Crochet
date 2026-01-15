@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "393668731125",
+    "project_id": "e3a-crochet",
+    "storage_bucket": "e3a-crochet.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:393668731125:android:e7eb32c7533606a846a5bc",
+        "android_client_info": {
+          "package_name": "com.enjeli.e3acrochet"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCFW_UIgIxoI8VMOteBZV0nL3FYfPErttc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

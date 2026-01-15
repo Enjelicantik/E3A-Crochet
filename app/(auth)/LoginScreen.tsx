@@ -1,47 +1,66 @@
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
+    Alert,
     Image,
     KeyboardAvoidingView,
     Platform,
+    ScrollView,
     StyleSheet,
     Text,
-    TouchableOpacity,
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAuth } from "../../context/auth";
 import { COLORS } from "../../styles/colors";
+
+// --- IMPORT FIREBASE ---
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../firebaseConfig";
 
 import Button from "../../components/common/Button";
 import InputField from "../../components/common/InputField";
 
 const LOGO_IMAGE = require("../../assets/images/Logo Crochet.png");
+
 const LoginScreen = () => {
-    const [username, setUsername] = useState("");
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
 
-    const { signIn } = useAuth();
-
-    const handleSubmit = () => {
-        if (username.trim() === "" || password.trim() === "") {
-            alert("Please enter your username/email and password.");
+    const handleLogin = async () => {
+        // Validasi input sederhana
+        if (email === "" || password === "") {
+            Alert.alert("Error", "Email dan Password tidak boleh kosong.");
             return;
         }
 
-        console.log("Attempting to log in...");
+        setLoading(true);
+        try {
+            // Proses Login ke Firebase
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
 
-        signIn();
+            console.log("Login Berhasil:", user.email);
+            
+            // Pindah ke halaman utama (Home) setelah berhasil login
+            router.replace("/(tabs)"); 
 
-        router.replace("/(tabs)");
-    };
+        } catch (error: any) {
+            console.error(error);
+            let errorMessage = "Terjadi kesalahan saat login.";
+            
+            if (error.code === 'auth/invalid-credential') {
+                errorMessage = "Email atau Password salah!";
+            } else if (error.code === 'auth/user-not-found') {
+                errorMessage = "Akun tidak ditemukan!";
+            } else if (error.code === 'auth/wrong-password') {
+                errorMessage = "Password salah!";
+            }
 
-    const handleRegister = () => {
-        router.push("/(auth)/RegisterScreen");
-    };
-
-    const handleForgotPassword = () => {
-        router.push("/(auth)/ForgotPasswordScreen");
+            Alert.alert("Login Gagal", errorMessage);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -49,167 +68,70 @@ const LoginScreen = () => {
             <KeyboardAvoidingView
                 style={styles.keyboardAvoidingView}
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
-                keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
             >
-                <View style={styles.scrollContainer}>
+                <ScrollView contentContainerStyle={styles.scrollContainer}>
                     <View style={styles.container}>
                         <Image source={LOGO_IMAGE} style={styles.logo} />
+
                         <Text style={styles.title}>Login</Text>
-                        <Text style={styles.subtitle}>
-                            Enter your username and password to login
-                        </Text>
+                        <Text style={styles.subtitle}>Welcome back! Please login.</Text>
 
-                        <InputField
-                            label="Email/Username:"
-                            placeholder="Enter Your Email or Username"
-                            icon="account"
-                            keyboardType="email-address"
-                            value={username}
-                            onChangeText={setUsername}
-                        />
+                        <View style={styles.form}>
+                            <InputField
+                                label="Email:"
+                                placeholder="Enter Your Email"
+                                icon="email"
+                                value={email}
+                                onChangeText={setEmail}
+                                keyboardType="email-address"
+                                autoCapitalize="none"
+                            />
 
-                        <InputField
-                            label="Password:"
-                            placeholder="Enter Your Password"
-                            icon="lock"
-                            isPassword={true}
-                            value={password}
-                            onChangeText={setPassword}
-                        />
+                            <InputField
+                                label="Password:"
+                                placeholder="Enter Your Password"
+                                icon="lock"
+                                isPassword={true}
+                                value={password}
+                                onChangeText={setPassword}
+                            />
 
-                        <TouchableOpacity
-                            onPress={handleForgotPassword}
-                            style={styles.forgotPassword}
-                        >
-                            <Text style={styles.forgotPasswordText}>
-                                Forgot Password?
-                            </Text>
-                        </TouchableOpacity>
+                            <Button
+                                title={loading ? "Logging in..." : "Login"}
+                                onPress={handleLogin}
+                                disabled={loading}
+                                style={styles.loginButton}
+                            />
 
-                        <Button
-                            title="Login"
-                            onPress={handleSubmit}
-                            style={styles.loginButton}
-                        />
-
-                        <View style={styles.registerContainer}>
-                            <Text style={styles.registerText}>
-                                {"Don't have an account?"}{" "}
-                            </Text>
-                            <TouchableOpacity onPress={handleRegister}>
-                                <Text style={styles.registerLink}>
+                            <View style={styles.footer}>
+                                <Text style={{color: '#fff'}}>Dont have an account?</Text>
+                                <Text 
+                                    style={styles.link} 
+                                    onPress={() => router.push("/(auth)/RegisterScreen")}
+                                >
                                     Register
                                 </Text>
-                            </TouchableOpacity>
+                            </View>
                         </View>
                     </View>
-                </View>
+                </ScrollView>
             </KeyboardAvoidingView>
         </SafeAreaView>
     );
 };
 
 const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: COLORS.background,
-    },
-    keyboardAvoidingView: {
-        flex: 1,
-    },
-    scrollContainer: {
-        flexGrow: 1,
-        justifyContent: "center",
-        paddingHorizontal: 30,
-        paddingVertical: 50,
-    },
-    container: {
-        alignItems: "center",
-    },
-    logo: {
-        width: 150,
-        height: 150,
-        marginBottom: 40,
-        tintColor: COLORS.primary,
-    },
-    title: {
-        fontSize: 32,
-        fontWeight: "bold",
-        color: COLORS.primary,
-        marginBottom: 10,
-    },
-    subtitle: {
-        fontSize: 16,
-        color: "#ffffff",
-        textAlign: "center",
-        marginBottom: 40,
-    },
-    forgotPassword: {
-        alignSelf: "flex-end",
-        marginTop: -10,
-        marginBottom: 20,
-    },
-    forgotPasswordText: {
-        color: COLORS.primary,
-        fontSize: 14,
-        fontWeight: "600",
-    },
-    loginButton: {
-        marginTop: 10,
-    },
-
-    // Gaya untuk "Or"
-    orContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginVertical: 30,
-        width: "100%",
-    },
-    line: {
-        flex: 1,
-        height: 1,
-        backgroundColor: "#E0E0E0",
-    },
-    orText: {
-        marginHorizontal: 15,
-        color: "#ffffff",
-        fontSize: 14,
-        fontWeight: "600",
-    },
-
-    // Gaya untuk Google Button
-    googleButton: {
-        flexDirection: "row",
-        justifyContent: "center",
-        alignItems: "center",
-        width: "100%",
-        paddingVertical: 12,
-        borderRadius: 10,
-        borderWidth: 1,
-        borderColor: "#ffffff",
-        backgroundColor: "#fff",
-    },
-    googleButtonText: {
-        fontSize: 16,
-        fontWeight: "bold",
-        color: COLORS.background,
-    },
-
-    // Gaya untuk Register
-    registerContainer: {
-        flexDirection: "row",
-        marginTop: 40,
-        justifyContent: "center",
-    },
-    registerText: {
-        fontSize: 16,
-        color: "#ffffff",
-    },
-    registerLink: {
-        fontSize: 16,
-        fontWeight: "600",
-        color: COLORS.primary,
-    },
+    safeArea: { flex: 1, backgroundColor: COLORS.background },
+    keyboardAvoidingView: { flex: 1 },
+    scrollContainer: { flexGrow: 1, justifyContent: "center", paddingHorizontal: 30 },
+    container: { alignItems: "center" },
+    logo: { width: 100, height: 100, marginBottom: 20, tintColor: COLORS.primary },
+    title: { fontSize: 32, fontWeight: "bold", color: COLORS.primary, marginBottom: 10 },
+    subtitle: { fontSize: 16, color: "#fff", marginBottom: 30 },
+    form: { width: "100%" },
+    loginButton: { marginTop: 10 },
+    footer: { flexDirection: 'row', justifyContent: 'center', marginTop: 20 },
+    link: { color: COLORS.primary, fontWeight: 'bold' }
 });
 
 export default LoginScreen;
